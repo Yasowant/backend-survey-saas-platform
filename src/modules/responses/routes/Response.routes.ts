@@ -3,6 +3,7 @@ import { Router } from "express";
 import { ResponseController } from "../controllers/Response.controller";
 import { asyncHandler } from "../../../shared/middleware/asyncHandler";
 import { authMiddleware } from "../../../shared/middleware/auth.middleware";
+import { permissionMiddleware } from "../../roles/middleware/permission.middleware";
 
 const router = Router();
 
@@ -25,6 +26,7 @@ router.get(
 router.post(
   "/",
   authMiddleware,
+  permissionMiddleware("RESPONSE_CREATE"),
   asyncHandler(responseController.submitResponse),
 );
 

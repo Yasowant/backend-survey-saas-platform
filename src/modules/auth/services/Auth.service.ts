@@ -9,6 +9,7 @@ import { RefreshTokenRepository } from "../repositories/RefreshToken.repository"
 import { MailService } from "./Mail.service";
 import { EmailVerificationTokenRepository } from "../repositories/EmailVerificationToken.repository";
 import { PasswordResetTokenRepository } from "../repositories/PasswordResetToken.repository";
+import { RoleRepository } from "../../roles/repositories/Role.repository";
 
 export class AuthService {
   private readonly userRepository = new UserRepository();
@@ -20,6 +21,7 @@ export class AuthService {
     new EmailVerificationTokenRepository();
   private readonly passwordResetTokenRepository =
     new PasswordResetTokenRepository();
+  private readonly roleReposistory = new RoleRepository();
 
   async register(data: {
     firstName: string;
@@ -32,12 +34,17 @@ export class AuthService {
     if (existingUser) {
       throw new ConflictError("Email already exists");
     }
+    const userRole = await this.roleReposistory.findByName("USER");
+    if (!userRole) {
+      throw new Error("Default USER Role not found");
+    }
 
     const hashedPassword = await this.passwordService.hash(data.password);
 
     const user = await this.userRepository.create({
       ...data,
       password: hashedPassword,
+      roleIds: [userRole._id],
     });
 
     const verificationToken = crypto.randomUUID();
@@ -257,19 +264,41 @@ export class AuthService {
 
   async login(email: string, password: string) {
     const user = await this.userRepository.findByEmail(email);
+
     if (!user) {
       throw new UnauthorizedError("Invalid credentials");
     }
+
     if (!user.isEmailVerified) {
       throw new UnauthorizedError("Please verify your email first");
     }
+
     const isPasswordValid = await this.passwordService.compare(
       password,
       user.password,
     );
+
     if (!isPasswordValid) {
       throw new UnauthorizedError("Invalid credentials");
     }
+
+    await user.populate({
+      path: "roleIds",
+      populate: {
+        path: "permissions",
+      },
+    });
+
+    const roles = (user.roleIds as any[]).map((role) => role.name);
+
+    const permissions = [
+      ...new Set(
+        (user.roleIds as any[]).flatMap((role) =>
+          role.permissions.map((permission: any) => permission.name),
+        ),
+      ),
+    ];
+
     const accessToken = this.tokenService.generateAccessToken({
       userId: user._id,
       email: user.email,
@@ -284,8 +313,18 @@ export class AuthService {
       refreshToken,
       new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
     );
+
     return {
-      user,
+      user: {
+        _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        isEmailVerified: user.isEmailVerified,
+        isActive: user.isActive,
+      },
+      roles,
+      permissions,
       accessToken,
       refreshToken,
     };
