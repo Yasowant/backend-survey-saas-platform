@@ -50,39 +50,200 @@ export class AuthService {
 
     const verificationUrl = `${env.CLIENT_URL}/verify-email?token=${verificationToken}`;
 
-    // Send email in background (don't block response)
+    const html = `
+  <div style="margin:0;padding:0;background:#f4f7fb;font-family:Inter,Arial,sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td align="center" style="padding:40px 20px;">
+
+          <table
+            width="600"
+            cellpadding="0"
+            cellspacing="0"
+            style="
+              background:#ffffff;
+              border-radius:16px;
+              overflow:hidden;
+              box-shadow:0 10px 30px rgba(0,0,0,0.08);
+            "
+          >
+
+            <!-- Header -->
+            <tr>
+              <td
+                align="center"
+                style="
+                  background:linear-gradient(135deg,#2563eb,#4f46e5);
+                  padding:40px 30px;
+                "
+              >
+                <h1
+                  style="
+                    color:#ffffff;
+                    margin:0;
+                    font-size:34px;
+                    font-weight:700;
+                  "
+                >
+                  Survesy
+                </h1>
+
+                <p
+                  style="
+                    color:#dbeafe;
+                    margin-top:10px;
+                    font-size:15px;
+                  "
+                >
+                  Build better surveys. Collect better insights.
+                </p>
+              </td>
+            </tr>
+
+            <!-- Body -->
+            <tr>
+              <td style="padding:40px;">
+
+                <h2
+                  style="
+                    color:#111827;
+                    margin-top:0;
+                    font-size:28px;
+                  "
+                >
+                  Welcome ${user.firstName} 👋
+                </h2>
+
+                <p
+                  style="
+                    color:#4b5563;
+                    line-height:1.8;
+                    font-size:16px;
+                  "
+                >
+                  Thank you for joining <strong>Survesy</strong>.
+                  Your account has been successfully created.
+                </p>
+
+                <p
+                  style="
+                    color:#4b5563;
+                    line-height:1.8;
+                    font-size:16px;
+                  "
+                >
+                  To activate your account and start creating powerful surveys,
+                  please verify your email address.
+                </p>
+
+                <div
+                  style="
+                    text-align:center;
+                    margin:40px 0;
+                  "
+                >
+                  <a
+                    href="${verificationUrl}"
+                    style="
+                      display:inline-block;
+                      background:#2563eb;
+                      color:#ffffff;
+                      text-decoration:none;
+                      padding:14px 32px;
+                      border-radius:10px;
+                      font-size:16px;
+                      font-weight:600;
+                    "
+                  >
+                    Verify Email Address
+                  </a>
+                </div>
+
+                <p
+                  style="
+                    color:#6b7280;
+                    font-size:14px;
+                  "
+                >
+                  This verification link will expire in 24 hours.
+                </p>
+
+                <div
+                  style="
+                    margin-top:30px;
+                    padding:16px;
+                    background:#f9fafb;
+                    border-radius:8px;
+                    border:1px solid #e5e7eb;
+                  "
+                >
+                  <p
+                    style="
+                      margin:0;
+                      color:#6b7280;
+                      font-size:13px;
+                      word-break:break-all;
+                    "
+                  >
+                    If the button doesn't work, copy and paste this link:
+                  </p>
+
+                  <p
+                    style="
+                      margin-top:10px;
+                      color:#2563eb;
+                      font-size:13px;
+                    "
+                  >
+                    ${verificationUrl}
+                  </p>
+                </div>
+
+              </td>
+            </tr>
+
+            <!-- Footer -->
+            <tr>
+              <td
+                style="
+                  background:#f9fafb;
+                  padding:25px;
+                  text-align:center;
+                  border-top:1px solid #e5e7eb;
+                "
+              >
+                <p
+                  style="
+                    margin:0;
+                    color:#6b7280;
+                    font-size:13px;
+                  "
+                >
+                  © ${new Date().getFullYear()} Survesy. All rights reserved.
+                </p>
+
+                <p
+                  style="
+                    margin-top:8px;
+                    color:#9ca3af;
+                    font-size:12px;
+                  "
+                >
+                  If you didn't create this account, you can safely ignore this email.
+                </p>
+              </td>
+            </tr>
+
+          </table>
+
+        </td>
+      </tr>
+    </table>
+  </div>
+  `;
+
     this.mailService
-      .sendEmail(
-        user.email,
-        "Verify Your Email",
-        `
-      <div style="font-family: Arial, sans-serif;">
-        <h2>Welcome ${user.firstName} 👋</h2>
-
-        <p>Thank you for registering.</p>
-
-        <p>Please click the button below to verify your email address:</p>
-
-        <a
-          href="${verificationUrl}"
-          style="
-            display:inline-block;
-            padding:12px 20px;
-            background:#2563eb;
-            color:#ffffff;
-            text-decoration:none;
-            border-radius:6px;
-          "
-        >
-          Verify Email
-        </a>
-
-        <p style="margin-top:20px;">
-          This link will expire in 24 hours.
-        </p>
-      </div>
-      `,
-      )
+      .sendEmail(user.email, "🎉 Welcome to Survesy - Verify Your Email", html)
       .catch((error) => {
         console.error("Email sending failed:", error);
       });
