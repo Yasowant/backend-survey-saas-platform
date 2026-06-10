@@ -48,23 +48,50 @@ export class AuthService {
       new Date(Date.now() + 24 * 60 * 60 * 1000),
     );
 
-    const verificationUrl = `${process.env.CLIENT_URL}/verify-email?token=${verificationToken}`;
+    const verificationUrl = `${env.CLIENT_URL}/verify-email?token=${verificationToken}`;
 
-    await this.mailService.sendEmail(
-      user.email,
-      "Verify Email",
-      `
-    <h2>Welcome ${user.firstName}</h2>
+    // Send email in background (don't block response)
+    this.mailService
+      .sendEmail(
+        user.email,
+        "Verify Your Email",
+        `
+      <div style="font-family: Arial, sans-serif;">
+        <h2>Welcome ${user.firstName} 👋</h2>
 
-    <p>Please verify your email.</p>
+        <p>Thank you for registering.</p>
 
-    <a href="${verificationUrl}">
-      Verify Email
-    </a>
-  `,
-    );
+        <p>Please click the button below to verify your email address:</p>
 
-    return user;
+        <a
+          href="${verificationUrl}"
+          style="
+            display:inline-block;
+            padding:12px 20px;
+            background:#2563eb;
+            color:#ffffff;
+            text-decoration:none;
+            border-radius:6px;
+          "
+        >
+          Verify Email
+        </a>
+
+        <p style="margin-top:20px;">
+          This link will expire in 24 hours.
+        </p>
+      </div>
+      `,
+      )
+      .catch((error) => {
+        console.error("Email sending failed:", error);
+      });
+
+    return {
+      user,
+      message:
+        "Registration successful. Please check your email to verify your account.",
+    };
   }
 
   async login(email: string, password: string) {

@@ -1,23 +1,21 @@
-import nodemailer from "nodemailer";
-
+import { Resend } from "resend";
 import { env } from "../../../config/env";
 
 export class MailService {
-  private transporter = nodemailer.createTransport({
-    service: "gmail",
-
-    auth: {
-      user: env.EMAIL_USER,
-      pass: env.EMAIL_PASSWORD,
-    },
-  });
+  private resend = new Resend(env.RESEND_API_KEY);
 
   async sendEmail(to: string, subject: string, html: string) {
-    await this.transporter.sendMail({
-      from: env.EMAIL_USER,
+    const { data, error } = await this.resend.emails.send({
+      from: env.EMAIL_FROM,
       to,
       subject,
       html,
     });
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    return data;
   }
 }
