@@ -29,4 +29,8 @@ export class SectionRepository {
   async delete(id: string) {
     return SectionModel.findByIdAndDelete(id);
   }
+
+  async deleteBySurveyId(surveyId: string) {
+    return SectionModel.deleteMany({ surveyId });
+  }
 }

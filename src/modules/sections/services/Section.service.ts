@@ -4,9 +4,13 @@ import { CreateSectionDto } from "../dto/CreateSection.dto";
 import { UpdateSectionDto } from "../dto/UpdateSection.dto";
 
 import { NotFoundError } from "../../../shared/exceptions/NotFoundError";
+import { QuestionRepository } from "../../questions/repositories/Question.repository";
 
 export class SectionService {
-  constructor(private readonly sectionRepository = new SectionRepository()) {}
+  constructor(
+    private readonly sectionRepository = new SectionRepository(),
+    private readonly questionRepository = new QuestionRepository(),
+  ) {}
 
   async createSection(data: CreateSectionDto) {
     return this.sectionRepository.create(data);
@@ -42,7 +46,7 @@ export class SectionService {
     if (!section) {
       throw new NotFoundError("Section not found");
     }
-
+    await this.questionRepository.deleteBySectionId(id);
     await this.sectionRepository.delete(id);
 
     return null;

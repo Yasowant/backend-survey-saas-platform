@@ -38,4 +38,12 @@ export class QuestionRepository {
   async delete(id: string) {
     return QuestionModel.findByIdAndDelete(id);
   }
+
+  async deleteBySurveyId(surveyId: string) {
+    return QuestionModel.deleteMany({ surveyId });
+  }
+
+  async deleteBySectionId(sectionId: string) {
+    return QuestionModel.deleteMany({ sectionId });
+  }
 }

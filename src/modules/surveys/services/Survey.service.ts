@@ -43,13 +43,21 @@ export class SurveyService {
 
   async deleteSurvey(id: string) {
     const survey = await this.surveyRepository.findById(id);
+    
     if (!survey) {
       throw new NotFoundError("Survey not found");
     }
+
+    await Promise.all([
+      this.questionRepository.deleteBySurveyId(id),
+      this.sectionRepository.deleteBySurveyId(id),
+      this.ruleRepository.deleteBySurveyId(id),
+    ]);
+
     await this.surveyRepository.delete(id);
     return null;
   }
-  
+
   async getSurveyDetails(id: string) {
     const survey = await this.surveyRepository.findById(id);
     if (!survey) {

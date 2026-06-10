@@ -32,4 +32,8 @@ export class RuleRepository {
   async delete(id: string) {
     return RuleModel.findByIdAndDelete(id);
   }
+
+  async deleteBySurveyId(surveyId: string) {
+    return RuleModel.deleteMany({ surveyId });
+  }
 }
